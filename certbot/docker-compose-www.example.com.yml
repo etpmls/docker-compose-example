@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+ certbot:
+  container_name: certbot
+  image: certbot/certbot:latest
+  volumes:
+  - /www/serv/certbot/var/lib/letsencrypt:/var/lib/letsencrypt # 根据官网设置的路径，https://eff-certbot.readthedocs.io/en/stable/install.html#running-with-docker
+  - /www/serv/certbot/var/log/letsencrypt/:/var/log/letsencrypt/ # 运行容器后，打印出来的路径，用于存放log文件
+  - /www/serv/nginx/etc/letsencrypt/live/:/etc/letsencrypt/live/ # 根据官网设置的路径，https://eff-certbot.readthedocs.io/en/stable/install.html#running-with-docker
+  - /www/serv/nginx/var/www/_letsencrypt:/var/www/_letsencrypt # 运行容器后，打印出来的路径，配置的Lets Encrypt Web根目录，不映射此目录否则无法运行
+  - /www/serv/nginx/etc/letsencrypt/archive/:/etc/letsencrypt/archive/ # /etc/letsencrypt/live实际指向../../archive
+  command: certonly --webroot -d example.com -d www.example.com --email example@example.com -w /var/www/_letsencrypt -n --agree-tos --force-renewal

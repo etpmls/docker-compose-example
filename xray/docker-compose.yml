@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  xray:
+    container_name: xray
+    image: teddysun/xray:1.8.1
+    restart: unless-stopped
+    networks:
+     - app
+    volumes:
+      - /www/serv/xray/etc/xray:/etc/xray
+      - /www/serv/xray/var/log/xray:/var/log/xray # 日志目录 https://xtls.github.io/document/level-0/ch07-xray-server.html#_7-4-%E9%85%8D%E7%BD%AE-xray
+      - /www/serv/nginx/etc/letsencrypt/live/:/etc/letsencrypt/live/ # 证书目录
+      - /www/serv/nginx/etc/letsencrypt/archive/:/etc/letsencrypt/archive/ # 证书实际目录
+networks:
+  app:
+    external: true
+    name: app

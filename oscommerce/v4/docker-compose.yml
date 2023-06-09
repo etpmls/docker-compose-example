@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  oscommerce-php:
+    container_name: oscommerce-php
+    image: php:7-fpm
+    restart: unless-stopped
+    networks:
+      - app
+    volumes:
+      # Website application directory
+      # 网站应用目录
+      - /www/app/:/www/app/
+    environment:
+      # https://www.oscommerce.com/wiki/index.php?title=Installing_osCommerce_v.4.0
+      - PHP_INI_EXPOSE=Off
+      - PHP_INI_MAX_EXECUTION_TIME=600
+      - PHP_INI_MAX_INPUT_TIME=600
+      - PHP_INI_MAX_INPUT_VARS=10000
+      - PHP_INI_MEMORY_LIMIT=256M
+      - PHP_INI_POST_MAX_SIZE=64M
+      - PHP_INI_UPLOAD_MAX_FILESIZE=64M
+      - PHP_INI_MAX_FILE_UPLOADS=50
+      - PHP_INI_SESSION_GC_PROBABILITY=1
+      - PHP_INI_SESSION_GC_MAXLIFETIME=14400
+      - PHP_INI_OPEN_BASEDIR=Off
+    depends_on:
+      - "oscommerce-mariadb"
+    command: sh -c "apt-get update && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev libicu-dev libxml2-dev libxslt-dev libzip-dev && docker-php-ext-install -j$(nproc) gd intl mysqli opcache soap xmlrpc xsl zip pdo_mysql && php-fpm"
+  oscommerce-mariadb:
+    container_name: oscommerce-mariadb
+    image: mariadb:10
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=YOUR_ROOT_PASSWD
+      - MARIADB_DATABASE=YOUR_DATABASE
+      - MARIADB_USER=YOUR_USER
+      - MARIADB_PASSWORD=YOUR_PASSWD
+      - MARIADB_INITDB_SKIP_TZINFO=true
+      - MYSQL_SQL_MODE=NO_ENGINE_SUBSTITUTION       # https://www.oscommerce.com/wiki/index.php?title=Installing_osCommerce_v.4.0
+    networks:
+     - app
+    volumes:
+      - /www/serv/html/YOUR_SITE_DIR/mariadb/var/lib/mysql:/var/lib/mysql
+networks:
+  app:
+    external: true
+    name: app

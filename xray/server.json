@@ -1,0 +1,69 @@
+// 参考https://xtls.github.io/Xray-docs-next/document/level-0/ch07-xray-server.html#_7-4-%E9%85%8D%E7%BD%AE-xray
+{
+    // 1\_日志设置
+    "log": {
+        "loglevel": "warning", // 内容从少到多: "none", "error", "warning", "info", "debug"
+        "access": "/var/log/xray/access.log", // 访问记录
+        "error": "/var/log/xray/error.log" // 错误记录
+    },
+    // 2_DNS 设置
+    "dns": {
+        "servers": [
+        "https+local://1.1.1.1/dns-query", // 首选 1.1.1.1 的 DoH 查询，牺牲速度但可防止 ISP 偷窥
+        "localhost"
+        ]
+    },
+    "inbounds": [
+      {
+        "listen": "0.0.0.0",
+        "port": 9000 ,
+        "protocol": "vless",
+        "settings": {
+          "clients": [
+            {
+              "id": "" // 填写你的 UUID
+            }
+          ],
+          "decryption": "none"
+        },
+        "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+            "path": "/YOUR_WS_PATH" // 填写你的 path
+          }
+        },
+        "sniffing": {
+            "enabled": true,
+            "destOverride": [
+                "http",
+                "tls"
+            ]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      },
+      {
+        "tag": "blocked",
+        "protocol": "blackhole",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:cn",
+            "geoip:private"
+          ],
+          "outboundTag": "blocked"
+        }
+      ]
+    }
+  }
